@@ -19,7 +19,7 @@ namespace VSTabPath
 
         protected override DockGroup CreateDockGroupCore()
         {
-            return _innerFactory?.CreateDocumentGroupContainer() ?? base.CreateDockGroupCore();
+            return _innerFactory?.CreateDockGroup() ?? base.CreateDockGroupCore();
         }
 
         protected override DocumentGroup CreateDocumentGroupCore()
@@ -64,7 +64,7 @@ namespace VSTabPath
 
         protected override View CreateViewCore(Type viewType)
         {
-            return _innerFactory?.CreateView() ?? base.CreateViewCore(viewType);
+            return _innerFactory?.CreateView(viewType) ?? base.CreateViewCore(viewType);
         }
 
         protected override ViewBookmark CreateViewBookmarkCore()

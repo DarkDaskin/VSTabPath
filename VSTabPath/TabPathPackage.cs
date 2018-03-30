@@ -64,8 +64,7 @@ namespace VSTabPath
         {
             base.Initialize();
 
-            // TODO: why it crashes when delegating to original ViewElementFactory?
-            ViewElementFactory.Current = new TabPathViewElementFactory(/*ViewElementFactory.Current*/null);
+            ViewElementFactory.Current = new TabPathViewElementFactory(ViewElementFactory.Current);
         }
 
         #endregion

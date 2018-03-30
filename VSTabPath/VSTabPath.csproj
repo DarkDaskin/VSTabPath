@@ -56,7 +56,6 @@
   <ItemGroup>
     <Compile Include="DelegatingViewElementFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TabPathDocumentGroup.cs" />
     <Compile Include="TabPathPackage.cs" />
     <Compile Include="TabPathViewElementFactory.cs" />
     <Compile Include="TabTitleManager.cs" />
