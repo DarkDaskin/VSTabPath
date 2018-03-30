@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
@@ -32,6 +33,14 @@ namespace VSTabPath
         public TabTitleProxy(WindowFrame frame)
         {
             _frame = frame;
+            _frame.PropertyChanged += OnFramePropertyChanged;
+        }
+
+        private void OnFramePropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            // Path information might be missing at solution load.
+            if (e.PropertyName == nameof(WindowFrame.DocumentMoniker))
+                OnPropertyChanged(nameof(Title));
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
