@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
@@ -15,7 +14,7 @@ namespace VSTabPath
 
         public string OriginalTitle => _frame.Title;
 
-        public string ParentDirectoryName => Path.GetFileName(Path.GetDirectoryName(_frame.DocumentMoniker));
+        public string ParentDirectoryName => Path.GetFileName(Path.GetDirectoryName(_frame.FrameMoniker.Filename));
 
         private bool _isPathVisible;
         public bool IsPathVisible
