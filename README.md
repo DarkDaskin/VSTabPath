@@ -14,6 +14,6 @@ Improvement suggestions are welcome.
 
 ## Compatibility
 
-The extension currently works with Visual Studio 2017. Support for other versions might be added in future.
+The extension currently works with Visual Studio 2017 - 2019. Support for other versions might be added in future.
 
 The extension is compatible with the [Custom Document Well](https://marketplace.visualstudio.com/items?itemName=VisualStudioPlatformTeam.CustomDocumentWell) extension (a component of [Productivity Power Tools 2017](https://marketplace.visualstudio.com/items?itemName=VisualStudioProductTeam.ProductivityPowerPack2017)).
