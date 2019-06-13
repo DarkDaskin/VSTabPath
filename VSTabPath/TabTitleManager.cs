@@ -53,9 +53,9 @@ namespace VSTabPath
             if (!(bindingExpression?.DataItem is WindowFrame frame))
                 return;
 
-            var titleProxy = new TabTitleProxy(frame);
+            var titleProxy = new TabTitleProxy(frame, this);
             BindingOperations.SetBinding(title, WindowFrameTitle.TitleProperty,
-                new Binding(nameof(TabTitleProxy.Title)) { Source = titleProxy });
+                new Binding(nameof(TabTitleProxy.Title)) {Source = titleProxy});
 
             _views.Add(view, titleProxy);
 
@@ -66,7 +66,7 @@ namespace VSTabPath
             };
         }
 
-        private void UpdateTabTitles()
+        public void UpdateTabTitles()
         {
             var proxiesByTitle = _views.ToLookup(kv => kv.Value.OriginalTitle, kv => kv.Value);
 

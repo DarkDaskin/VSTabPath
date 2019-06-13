@@ -9,6 +9,7 @@ namespace VSTabPath
     public class TabTitleProxy : INotifyPropertyChanged
     {
         private readonly WindowFrame _frame;
+        private readonly TabTitleManager _tabTitleManager;
 
         public string Title => IsPathVisible ? Path.Combine(ParentDirectoryName, OriginalTitle) : OriginalTitle;
 
@@ -29,17 +30,22 @@ namespace VSTabPath
             }
         }
 
-        public TabTitleProxy(WindowFrame frame)
+        public TabTitleProxy(WindowFrame frame, TabTitleManager tabTitleManager)
         {
             _frame = frame;
             _frame.PropertyChanged += OnFramePropertyChanged;
+            _tabTitleManager = tabTitleManager;
         }
 
         private void OnFramePropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            // Path information might be missing at solution load.
-            if (e.PropertyName == nameof(WindowFrame.DocumentMoniker))
+            if (e.PropertyName == nameof(WindowFrame.AnnotatedTitle))
+            {
                 OnPropertyChanged(nameof(Title));
+
+                // File rename may change tab title uniqueness.
+                _tabTitleManager.UpdateTabTitles();
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
