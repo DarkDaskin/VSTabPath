@@ -32,7 +32,7 @@ namespace VSTabPath
 
         #endregion
 
-        private readonly Dictionary<DocumentView, TabTitleProxy> _views = new Dictionary<DocumentView, TabTitleProxy>();
+        private readonly Dictionary<DocumentView, WindowFrameTitleWithPath> _views = new Dictionary<DocumentView, WindowFrameTitleWithPath>();
 
         public void RegisterDocumentView(DocumentView view)
         {
@@ -53,11 +53,12 @@ namespace VSTabPath
             if (!(bindingExpression?.DataItem is WindowFrame frame))
                 return;
 
-            var titleProxy = new TabTitleProxy(frame, this);
-            BindingOperations.SetBinding(title, WindowFrameTitle.TitleProperty,
-                new Binding(nameof(TabTitleProxy.Title)) {Source = titleProxy});
-
-            _views.Add(view, titleProxy);
+            var titleWithPath = new WindowFrameTitleWithPath(title, view.TabTitleTemplate, frame, this);
+            view.Title = titleWithPath;
+            view.DocumentTabTitleTemplate = view.TabTitleTemplate =
+                (DataTemplate) Application.Current.FindResource("TabPathTemplate");
+            
+            _views.Add(view, titleWithPath);
 
             frame.FrameDestroyed += (sender, args) =>
             {
@@ -65,22 +66,22 @@ namespace VSTabPath
                 UpdateTabTitles();
             };
         }
-
+        
         public void UpdateTabTitles()
         {
-            var proxiesByTitle = _views.ToLookup(kv => kv.Value.OriginalTitle, kv => kv.Value);
+            var modelsByTitle = _views.ToLookup(kv => kv.Value.OriginalTitle, kv => kv.Value);
 
-            var proxiesWithDuplicateTitles = proxiesByTitle
+            var modelsWithDuplicateTitles = modelsByTitle
                 .Where(g => g.Count() > 1)
                 .SelectMany(g => g);
-            foreach (var titleProxy in proxiesWithDuplicateTitles)
-                titleProxy.IsPathVisible = true;
+            foreach (var model in modelsWithDuplicateTitles)
+                model.IsPathVisible = true;
 
-            var proxiesWithUniqueTitles = proxiesByTitle
+            var modelsWithUniqueTitles = modelsByTitle
                 .Where(g => g.Count() == 1)
                 .SelectMany(g => g);
-            foreach (var titleProxy in proxiesWithUniqueTitles)
-                titleProxy.IsPathVisible = false;
+            foreach (var model in modelsWithUniqueTitles)
+                model.IsPathVisible = false;
         }
 
         private static TProperty EnsurePropertyValue<T, TProperty>(T target, DependencyProperty property, Func<TProperty> factory)

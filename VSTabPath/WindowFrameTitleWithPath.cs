@@ -1,21 +1,22 @@
 ﻿using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.Platform.WindowManagement;
 
 namespace VSTabPath
 {
-    public class TabTitleProxy : INotifyPropertyChanged
+    public class WindowFrameTitleWithPath : INotifyPropertyChanged
     {
         private readonly WindowFrame _frame;
-        private readonly TabTitleManager _tabTitleManager;
-
-        public string Title => IsPathVisible ? Path.Combine(ParentDirectoryName, OriginalTitle) : OriginalTitle;
+        private readonly TabTitleManager _titleManager;
+        public WindowFrameTitle Title { get; private set; }
+        public DataTemplate TitleTemplate { get; private set; }
 
         public string OriginalTitle => _frame.Title;
 
-        public string ParentDirectoryName => Path.GetFileName(Path.GetDirectoryName(_frame.FrameMoniker.Filename));
+        public string DirectoryPath => Path.GetFileName(Path.GetDirectoryName(_frame.FrameMoniker.Filename));
 
         private bool _isPathVisible;
         public bool IsPathVisible
@@ -30,11 +31,14 @@ namespace VSTabPath
             }
         }
 
-        public TabTitleProxy(WindowFrame frame, TabTitleManager tabTitleManager)
+        public WindowFrameTitleWithPath(WindowFrameTitle title, DataTemplate titleTemplate,
+            WindowFrame frame, TabTitleManager titleManager)
         {
+            Title = title;
+            TitleTemplate = titleTemplate;
             _frame = frame;
             _frame.PropertyChanged += OnFramePropertyChanged;
-            _tabTitleManager = tabTitleManager;
+            _titleManager = titleManager;
         }
 
         private void OnFramePropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -44,7 +48,7 @@ namespace VSTabPath
                 OnPropertyChanged(nameof(Title));
 
                 // File rename may change tab title uniqueness.
-                _tabTitleManager.UpdateTabTitles();
+                _titleManager.UpdateTabTitles();
             }
         }
 

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows;
 using Microsoft.VisualStudio.PlatformUI.Shell;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -59,8 +61,10 @@ namespace VSTabPath
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
             await base.InitializeAsync(cancellationToken, progress);
-            
+
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
+            MergeResources();
 
             TabPathViewElementFactory.SetupExistingDocuments();
 
@@ -68,5 +72,17 @@ namespace VSTabPath
         }
 
         #endregion
+
+        private static void MergeResources()
+        {
+            var resourceDictionary = LoadResourceDictionary("DataTemplates.xaml");
+            Application.Current.Resources.MergedDictionaries.Add(resourceDictionary);
+        }
+
+        private static ResourceDictionary LoadResourceDictionary(string xamlName)
+        {
+            return (ResourceDictionary)Application.LoadComponent(
+                new Uri(Assembly.GetExecutingAssembly().GetName().Name + ";component/" + xamlName, UriKind.Relative));
+        }
     }
 }
