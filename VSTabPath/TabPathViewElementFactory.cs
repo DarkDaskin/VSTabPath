@@ -57,19 +57,6 @@ namespace VSTabPath
                 SetupView(view);
         }
 
-        private static IEnumerable<T> FindLogicalDescendants<T>(DependencyObject obj)
-            where T : DependencyObject
-        {
-            foreach (DependencyObject child in LogicalTreeHelper.GetChildren(obj))
-            {
-                if (child is T tChild)
-                    yield return tChild;
-
-                foreach (var descendant in FindLogicalDescendants<T>(child))
-                    yield return descendant;
-            }
-        }
-
         private static IEnumerable<T> FindVisualDescendants<T>(DependencyObject obj)
             where T : DependencyObject
         {

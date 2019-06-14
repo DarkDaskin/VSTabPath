@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using Microsoft.VisualStudio.Platform.WindowManagement;
 using Microsoft.VisualStudio.PlatformUI.Shell;
+using VSTabPath.Models;
+using VSTabPath.ViewModels;
 
 namespace VSTabPath
 {
@@ -35,31 +36,30 @@ namespace VSTabPath
 
         #region TitleWithPathProperty
 
-        public static readonly DependencyProperty TitleWithPathProperty = DependencyProperty.RegisterAttached(
-            "TitleWithPath", typeof(WindowFrameTitleWithPath), typeof(TabTitleManager));
+        public static readonly DependencyProperty TabViewModelProperty = DependencyProperty.RegisterAttached(
+            "TabViewModel", typeof(TabViewModel), typeof(TabTitleManager));
 
-        public static void SetTitleWithPath(DependencyObject element, WindowFrameTitleWithPath value)
+        public static void SetTabViewModel(DependencyObject element, TabViewModel value)
         {
-            element.SetValue(TitleWithPathProperty, value);
+            element.SetValue(TabViewModelProperty, value);
         }
 
-        public static WindowFrameTitleWithPath GetTitleWithPath(DependencyObject element)
+        public static TabViewModel GetTabViewModel(DependencyObject element)
         {
-            return (WindowFrameTitleWithPath) element.GetValue(TitleWithPathProperty);
+            return (TabViewModel) element.GetValue(TabViewModelProperty);
         }
 
         #endregion
 
-        private readonly Dictionary<DocumentView, WindowFrameTitleWithPath> _views = new Dictionary<DocumentView, WindowFrameTitleWithPath>();
+        private readonly Dictionary<DocumentView, TabViewModel> _viewModels = new Dictionary<DocumentView, TabViewModel>();
+        private readonly DisplayPathResolver _displayPathResolver = new DisplayPathResolver();
 
         public void RegisterDocumentView(DocumentView view)
         {
-            if (_views.ContainsKey(view))
+            if (_viewModels.ContainsKey(view))
                 return;
 
             InstallTabTitlePath(view);
-
-            UpdateTabTitles();
         }
 
         private void InstallTabTitlePath(DocumentView view)
@@ -71,35 +71,28 @@ namespace VSTabPath
             if (!(bindingExpression?.DataItem is WindowFrame frame))
                 return;
 
-            var titleWithPath = new WindowFrameTitleWithPath(title, view.TabTitleTemplate, frame, this);
-            SetTitleWithPath(view, titleWithPath);
+            var model = new TabModel(frame.FrameMoniker.Filename);
+            frame.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(WindowFrame.AnnotatedTitle))
+                    model.FullPath = frame.FrameMoniker.Filename;
+            };
+
+            _displayPathResolver.Add(model);
+
+            var viewModel = new TabViewModel(title, view.TabTitleTemplate, model);
+            SetTabViewModel(view, viewModel);
+
             view.DocumentTabTitleTemplate = view.TabTitleTemplate =
                 (DataTemplate) Application.Current.FindResource("TabPathTemplate");
             
-            _views.Add(view, titleWithPath);
+            _viewModels.Add(view, viewModel);
 
             frame.FrameDestroyed += (sender, args) =>
             {
-                _views.Remove(view);
-                UpdateTabTitles();
+                _displayPathResolver.Remove(_viewModels[view].Model);
+                _viewModels.Remove(view);
             };
-        }
-        
-        public void UpdateTabTitles()
-        {
-            var modelsByTitle = _views.ToLookup(kv => kv.Value.OriginalTitle, kv => kv.Value);
-
-            var modelsWithDuplicateTitles = modelsByTitle
-                .Where(g => g.Count() > 1)
-                .SelectMany(g => g);
-            foreach (var model in modelsWithDuplicateTitles)
-                model.IsPathVisible = true;
-
-            var modelsWithUniqueTitles = modelsByTitle
-                .Where(g => g.Count() == 1)
-                .SelectMany(g => g);
-            foreach (var model in modelsWithUniqueTitles)
-                model.IsPathVisible = false;
         }
 
         private static TProperty EnsurePropertyValue<T, TProperty>(T target, DependencyProperty property, Func<TProperty> factory)

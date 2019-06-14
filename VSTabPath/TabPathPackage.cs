@@ -75,7 +75,7 @@ namespace VSTabPath
 
         private static void MergeResources()
         {
-            var resourceDictionary = LoadResourceDictionary("DataTemplates.xaml");
+            var resourceDictionary = LoadResourceDictionary("Views/DataTemplates.xaml");
             Application.Current.Resources.MergedDictionaries.Add(resourceDictionary);
         }
 
