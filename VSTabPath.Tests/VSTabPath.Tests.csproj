@@ -50,10 +50,12 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DisplayPathResolverTests.cs" />
+    <Compile Include="DisplayPathResolverTests_NoSolution.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DisplayPathResolverTests_Solution.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

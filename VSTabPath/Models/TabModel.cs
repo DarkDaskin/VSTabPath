@@ -32,6 +32,8 @@ namespace VSTabPath.Models
             }
         }
 
+        public string DirectoryName => Path.GetDirectoryName(FullPath);
+
         public string FileName => Path.GetFileName(FullPath);
 
         public TabModel()

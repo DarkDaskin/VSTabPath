@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows;
 using System.Windows.Data;
+using EnvDTE;
 using Microsoft.VisualStudio.Platform.WindowManagement;
 using Microsoft.VisualStudio.PlatformUI.Shell;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using VSTabPath.Models;
 using VSTabPath.ViewModels;
 
@@ -53,6 +57,17 @@ namespace VSTabPath
 
         private readonly Dictionary<DocumentView, TabViewModel> _viewModels = new Dictionary<DocumentView, TabViewModel>();
         private readonly DisplayPathResolver _displayPathResolver = new DisplayPathResolver();
+        private readonly DTE _dte = (DTE) Package.GetGlobalService(typeof(SDTE));
+
+        public TabTitleManager()
+        {
+            _displayPathResolver.SolutionRootPath = Path.GetDirectoryName(_dte.Solution?.FullName);
+
+            _dte.Events.SolutionEvents.Opened += () => 
+                _displayPathResolver.SolutionRootPath = Path.GetDirectoryName(_dte.Solution.FullName);
+            _dte.Events.SolutionEvents.AfterClosing += () => 
+                _displayPathResolver.SolutionRootPath = null;
+        }
 
         public void RegisterDocumentView(DocumentView view)
         {
