@@ -1,8 +1,10 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="clr-namespace:VSTabPath;assembly=VSTabPath">
-    <DataTemplate x:Key="TabPathTemplate" DataType="{x:Type local:WindowFrameTitleWithPath}">
+    xmlns:local="clr-namespace:VSTabPath;assembly=VSTabPath"
+    xmlns:wm="clr-namespace:Microsoft.VisualStudio.Platform.WindowManagement;assembly=Microsoft.VisualStudio.Platform.WindowManagement">
+
+    <DataTemplate x:Key="TabPathInnerTemplate" DataType="{x:Type local:WindowFrameTitleWithPath}">
         <StackPanel Orientation="Horizontal">
             <ContentControl Content="{Binding Title}" ContentTemplate="{Binding TitleTemplate}" />
             <TextBlock
@@ -21,5 +23,12 @@
                 </DataTrigger.Setters>
             </DataTrigger>
         </DataTemplate.Triggers>
+    </DataTemplate>
+
+    <DataTemplate x:Key="TabPathTemplate" DataType="{x:Type wm:WindowFrameTitle}">
+        <ContentControl
+            Content="{Binding}"
+            ContentTemplate="{StaticResource TabPathInnerTemplate}"
+            DataContext="{Binding RelativeSource={RelativeSource AncestorType=ContentControl}, Path=DataContext.(local:TabTitleManager.TitleWithPath)}" />
     </DataTemplate>
 </ResourceDictionary>

@@ -13,7 +13,8 @@ namespace VSTabPath
         #region TabTitleManagerProperty
 
         public static readonly DependencyProperty TabTitleManagerProperty = 
-            DependencyProperty.RegisterAttached(nameof(TabTitleManager), typeof(TabTitleManager), typeof(ViewGroup));
+            DependencyProperty.RegisterAttached(
+                nameof(TabTitleManager), typeof(TabTitleManager), typeof(TabTitleManager));
 
         public static TabTitleManager GetTabTitleManager(ViewGroup target)
         {
@@ -32,6 +33,23 @@ namespace VSTabPath
 
         #endregion
 
+        #region TitleWithPathProperty
+
+        public static readonly DependencyProperty TitleWithPathProperty = DependencyProperty.RegisterAttached(
+            "TitleWithPath", typeof(WindowFrameTitleWithPath), typeof(TabTitleManager));
+
+        public static void SetTitleWithPath(DependencyObject element, WindowFrameTitleWithPath value)
+        {
+            element.SetValue(TitleWithPathProperty, value);
+        }
+
+        public static WindowFrameTitleWithPath GetTitleWithPath(DependencyObject element)
+        {
+            return (WindowFrameTitleWithPath) element.GetValue(TitleWithPathProperty);
+        }
+
+        #endregion
+
         private readonly Dictionary<DocumentView, WindowFrameTitleWithPath> _views = new Dictionary<DocumentView, WindowFrameTitleWithPath>();
 
         public void RegisterDocumentView(DocumentView view)
@@ -39,12 +57,12 @@ namespace VSTabPath
             if (_views.ContainsKey(view))
                 return;
 
-            InstallTabTitleProxy(view);
+            InstallTabTitlePath(view);
 
             UpdateTabTitles();
         }
 
-        private void InstallTabTitleProxy(DocumentView view)
+        private void InstallTabTitlePath(DocumentView view)
         {
             if (!(view.Title is WindowFrameTitle title))
                 return;
@@ -54,7 +72,7 @@ namespace VSTabPath
                 return;
 
             var titleWithPath = new WindowFrameTitleWithPath(title, view.TabTitleTemplate, frame, this);
-            view.Title = titleWithPath;
+            SetTitleWithPath(view, titleWithPath);
             view.DocumentTabTitleTemplate = view.TabTitleTemplate =
                 (DataTemplate) Application.Current.FindResource("TabPathTemplate");
             
