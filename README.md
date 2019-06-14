@@ -8,7 +8,7 @@ Download: [Visual Studio Marketplace](https://marketplace.visualstudio.com/items
 
 Visual Studio extension which shows file paths in tab titles with same file names.
 
-This extension is currently very basic and just prepends parent directory name to duplicate tab titles. The end goal is to make it work like similar feature of Visual Studio Code.
+It is inspired by a built-in feature of Visual Studio Code and has similar look and feel, showing relevant path segments next to file names.
 
 Improvement suggestions are welcome.
 
