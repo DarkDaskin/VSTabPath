@@ -86,11 +86,11 @@ namespace VSTabPath
             if (!(bindingExpression?.DataItem is WindowFrame frame))
                 return;
 
-            var model = new TabModel(frame.FrameMoniker.Filename);
+            var model = new TabModel(FixFileNameCase(frame.FrameMoniker.Filename));
             frame.PropertyChanged += (sender, args) =>
             {
                 if (args.PropertyName == nameof(WindowFrame.AnnotatedTitle))
-                    model.FullPath = frame.FrameMoniker.Filename;
+                    model.FullPath = FixFileNameCase(frame.FrameMoniker.Filename);
             };
 
             _displayPathResolver.Add(model);
@@ -120,6 +120,22 @@ namespace VSTabPath
                 target.SetValue(property, value);
             }
             return value;
+        }
+
+        private static string FixFileNameCase(string fileName)
+        {
+            try
+            {
+                var pathParts = fileName.Split(Path.DirectorySeparatorChar);
+                var fixedPath = pathParts[0].ToUpperInvariant() + "\\";
+                for (var i = 1; i < pathParts.Length; i++)
+                    fixedPath = Directory.GetFileSystemEntries(fixedPath, pathParts[i])[0];
+                return fixedPath;
+            }
+            catch
+            {
+                return fileName;
+            }
         }
     }
 }
