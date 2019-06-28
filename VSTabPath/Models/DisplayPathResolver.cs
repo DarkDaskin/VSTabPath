@@ -201,6 +201,7 @@ namespace VSTabPath.Models
 
             // Find ambiguous paths and resolve them.
             var modelsWithDuplicateDisplayPath = models
+                .Where(m => m.Value.Any(p => !p.isIncluded))
                 .GroupBy(m => m.Key.DisplayPath, (key, g) => g.ToDictionary(m => m.Key, m => m.Value),
                     StringComparer.OrdinalIgnoreCase)
                 .Where(g => g.Count() > 1);
