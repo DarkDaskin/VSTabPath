@@ -13,9 +13,12 @@ namespace VSTabPath.Models
 
         private static readonly char[] DirectorySeparators =
             {Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar};
+        private static readonly IEqualityComparer<string> PathComparer = StringComparer.OrdinalIgnoreCase;
 
-        private readonly List<TabModel> _models = new List<TabModel>();
+        private Dictionary<string, List<TabModel>> _modelsByFullPath = new Dictionary<string, List<TabModel>>(PathComparer);
         private string _solutionRootPath;
+
+        private IEnumerable<TabModel> ModelsWithUniqueFullPaths => _modelsByFullPath.Values.Select(list => list[0]);
 
         public string SolutionRootPath
         {
@@ -39,7 +42,9 @@ namespace VSTabPath.Models
 
         public void Add(TabModel model)
         {
-            _models.Add(model);
+            if (!_modelsByFullPath.TryGetValue(model.FullPath, out var models))
+                _modelsByFullPath.Add(model.FullPath, models = new List<TabModel>());
+            models.Add(model);
 
             model.PropertyChanged += OnModelPropertyChanged;
 
@@ -50,14 +55,19 @@ namespace VSTabPath.Models
         {
             model.PropertyChanged -= OnModelPropertyChanged;
 
-            _models.Remove(model);
+            if (_modelsByFullPath.TryGetValue(model.FullPath, out var models))
+            {
+                models.Remove(model);
+                if (models.Count == 0)
+                    _modelsByFullPath.Remove(model.FullPath);
+            }
 
             UpdateModels(model.FileName);
         }
 
         public IEnumerator<TabModel> GetEnumerator()
         {
-            return _models.GetEnumerator();
+            return _modelsByFullPath.Values.SelectMany(m => m).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -67,22 +77,35 @@ namespace VSTabPath.Models
 
         private void OnModelPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
-            if(args.PropertyName == nameof(TabModel.FullPath))
+            if (args.PropertyName == nameof(TabModel.FullPath))
+            {
+                RegroupTabs();
                 UpdateModels();
+            }
+        }
+
+        private void RegroupTabs()
+        {
+            _modelsByFullPath = this
+                .GroupBy(m => m.FullPath)
+                .ToDictionary(g => g.Key, g => g.ToList(), PathComparer);
         }
 
         private void UpdateModels(string fileName)
         {
-            var modelsToUpdate = _models.Where(m => PathEquals(m.FileName, fileName)).ToList();
+            var modelsToUpdate = ModelsWithUniqueFullPaths
+                .Where(m => PathEquals(m.FileName, fileName))
+                .ToList();
             if (modelsToUpdate.Count == 1)
-                modelsToUpdate[0].DisplayPath = null;
+                UpdateDisplayPathsByFullPath(modelsToUpdate[0], null);
             else
                 UpdateModelsWithDuplicateFilename(modelsToUpdate);
         }
 
         private void UpdateModels()
         {
-            var modelsByFileName = _models.ToLookup(m => m.FileName, StringComparer.OrdinalIgnoreCase);
+            var modelsByFileName = ModelsWithUniqueFullPaths
+                .ToLookup(m => m.FileName, PathComparer);
 
             var modelsWithDuplicateFileName = modelsByFileName
                 .Where(g => g.Count() > 1)
@@ -94,7 +117,13 @@ namespace VSTabPath.Models
                 .Where(g => g.Count() == 1)
                 .SelectMany(g => g);
             foreach (var model in modelsWithUniqueFileName)
-                model.DisplayPath = null;
+                UpdateDisplayPathsByFullPath(model, null);
+        }
+
+        private void UpdateDisplayPathsByFullPath(TabModel example, string displayPath)
+        {
+            foreach (var model in _modelsByFullPath[example.FullPath])
+                model.DisplayPath = displayPath;
         }
 
         private void UpdateModelsWithDuplicateFilename(IReadOnlyCollection<TabModel> models)
@@ -102,7 +131,7 @@ namespace VSTabPath.Models
             var modelsAtSolutionRoot = models
                 .Where(m => PathEquals(m.DirectoryName, SolutionRootPath));
             foreach (var model in modelsAtSolutionRoot)
-                model.DisplayPath = @".\";
+                UpdateDisplayPathsByFullPath(model, @".\");
 
             var modelsOutsideSolutionRoot = models
                 .Where(m => !IsBaseOf(SolutionRootPath, m.DirectoryName) && !PathEquals(m.DirectoryName, SolutionRootPath));
@@ -149,7 +178,7 @@ namespace VSTabPath.Models
             return path.Split(DirectorySeparators, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        private static void ResolvePartialDisplayPaths(Dictionary<TabModel, List<(string value, bool isIncluded)>> models, bool isUnderSolutionRoot)
+        private void ResolvePartialDisplayPaths(Dictionary<TabModel, List<(string value, bool isIncluded)>> models, bool isUnderSolutionRoot)
         {
             // When path is outside solution root, always include the root segment (i.e. drive letter).
             // A separator has to be appended to keep it after Path.Combine.
@@ -160,7 +189,7 @@ namespace VSTabPath.Models
             ResolvePartialDisplayPaths(models);
         }
 
-        private static void ResolvePartialDisplayPaths(Dictionary<TabModel, List<(string value, bool isIncluded)>> models)
+        private void ResolvePartialDisplayPaths(Dictionary<TabModel, List<(string value, bool isIncluded)>> models)
         {
             // Include one more segment from the end.
             foreach (var segments in models.Values)
@@ -196,7 +225,7 @@ namespace VSTabPath.Models
                     }
                 }
 
-                model.Key.DisplayPath = Path.Combine(finalSegments.ToArray());
+                UpdateDisplayPathsByFullPath(model.Key, Path.Combine(finalSegments.ToArray()));
             }
 
             // Find ambiguous paths and resolve them.
