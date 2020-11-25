@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using EnvDTE;
@@ -57,16 +58,41 @@ namespace VSTabPath
 
         private readonly Dictionary<DocumentView, TabViewModel> _viewModels = new Dictionary<DocumentView, TabViewModel>();
         private readonly DisplayPathResolver _displayPathResolver = new DisplayPathResolver();
-        private readonly DTE _dte = (DTE) Package.GetGlobalService(typeof(SDTE));
+        private readonly DTE _dte;
 
         public TabTitleManager()
         {
-            _displayPathResolver.SolutionRootPath = Path.GetDirectoryName(_dte.Solution?.FullName);
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            _dte = (DTE) Package.GetGlobalService(typeof(SDTE));
+
+            _displayPathResolver.SolutionRootPath = GetSolutionRootPath();
 
             _dte.Events.SolutionEvents.Opened += () => 
-                _displayPathResolver.SolutionRootPath = Path.GetDirectoryName(_dte.Solution.FullName);
+                _displayPathResolver.SolutionRootPath = GetSolutionRootPath();
+            _dte.Events.SolutionEvents.Renamed += _ => 
+                _displayPathResolver.SolutionRootPath = GetSolutionRootPath();
             _dte.Events.SolutionEvents.AfterClosing += () => 
                 _displayPathResolver.SolutionRootPath = null;
+        }
+
+        private string GetSolutionRootPath()
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            var solution = _dte.Solution;
+            if (solution == null)
+                return null;
+
+            var fullName = solution.FullName;
+            if (string.IsNullOrEmpty(fullName))
+            {
+                // A project has been opened without a solution, so a temporary one is created.
+                // Use the project root path instead.
+                fullName = solution.Projects.Cast<Project>().FirstOrDefault()?.FullName;
+            }
+
+            return string.IsNullOrEmpty(fullName) ? null : Path.GetDirectoryName(fullName);
         }
 
         public void RegisterDocumentView(DocumentView view)
