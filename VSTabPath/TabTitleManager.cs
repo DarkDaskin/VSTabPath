@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Windows;
-using System.Windows.Data;
-using EnvDTE;
-using Microsoft.VisualStudio.Platform.WindowManagement;
+﻿using Microsoft.VisualStudio.Platform.WindowManagement;
 using Microsoft.VisualStudio.PlatformUI.Shell;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Windows;
+using System.Windows.Data;
+using VSTabPath.Interop.Contracts;
 using VSTabPath.Models;
 using VSTabPath.ViewModels;
 
@@ -18,13 +16,13 @@ namespace VSTabPath
     {
         #region TabTitleManagerProperty
 
-        public static readonly DependencyProperty TabTitleManagerProperty = 
+        public static readonly DependencyProperty TabTitleManagerProperty =
             DependencyProperty.RegisterAttached(
                 nameof(TabTitleManager), typeof(TabTitleManager), typeof(TabTitleManager));
 
         public static TabTitleManager GetTabTitleManager(ViewGroup target)
         {
-            return (TabTitleManager) target.GetValue(TabTitleManagerProperty);
+            return (TabTitleManager)target.GetValue(TabTitleManagerProperty);
         }
 
         public static void SetTabTitleManager(ViewGroup target, TabTitleManager value)
@@ -51,49 +49,32 @@ namespace VSTabPath
 
         public static TabViewModel GetTabViewModel(DependencyObject element)
         {
-            return (TabViewModel) element.GetValue(TabViewModelProperty);
+            return (TabViewModel)element.GetValue(TabViewModelProperty);
         }
 
         #endregion
 
         private readonly Dictionary<DocumentView, TabViewModel> _viewModels = new Dictionary<DocumentView, TabViewModel>();
         private readonly DisplayPathResolver _displayPathResolver = new DisplayPathResolver();
-        private readonly DTE _dte;
+        private readonly IDteInterop _dte;
 
         public TabTitleManager()
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            _dte = (DTE) Package.GetGlobalService(typeof(SDTE));
+            _dte = DteInteropResolver.Interop;
 
             _displayPathResolver.SolutionRootPath = GetSolutionRootPath();
 
-            _dte.Events.SolutionEvents.Opened += () => 
+            _dte.SolutionOpened += () =>
                 _displayPathResolver.SolutionRootPath = GetSolutionRootPath();
-            _dte.Events.SolutionEvents.Renamed += _ => 
+            _dte.SolutionRenamed += _ =>
                 _displayPathResolver.SolutionRootPath = GetSolutionRootPath();
-            _dte.Events.SolutionEvents.AfterClosing += () => 
+            _dte.SolutionClosed += () =>
                 _displayPathResolver.SolutionRootPath = null;
         }
 
-        private string GetSolutionRootPath()
-        {
-            ThreadHelper.ThrowIfNotOnUIThread();
-
-            var solution = _dte.Solution;
-            if (solution == null)
-                return null;
-
-            var fullName = solution.FullName;
-            if (string.IsNullOrEmpty(fullName))
-            {
-                // A project has been opened without a solution, so a temporary one is created.
-                // Use the project root path instead.
-                fullName = solution.Projects.Cast<Project>().FirstOrDefault()?.FullName;
-            }
-
-            return string.IsNullOrEmpty(fullName) ? null : Path.GetDirectoryName(fullName);
-        }
+        private string GetSolutionRootPath() => _dte.GetSolutionRootPath();
 
         public void RegisterDocumentView(DocumentView view)
         {
@@ -125,8 +106,8 @@ namespace VSTabPath
             SetTabViewModel(view, viewModel);
 
             view.DocumentTabTitleTemplate = view.TabTitleTemplate =
-                (DataTemplate) Application.Current.FindResource("TabPathTemplate");
-            
+                (DataTemplate)Application.Current.FindResource("TabPathTemplate");
+
             _viewModels.Add(view, viewModel);
 
             frame.FrameDestroyed += (sender, args) =>
@@ -139,7 +120,7 @@ namespace VSTabPath
         private static TProperty EnsurePropertyValue<T, TProperty>(T target, DependencyProperty property, Func<TProperty> factory)
             where T : DependencyObject
         {
-            var value = (TProperty) target.GetValue(property);
+            var value = (TProperty)target.GetValue(property);
             if (value == null)
             {
                 value = factory();

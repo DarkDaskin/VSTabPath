@@ -1,0 +1,24 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- We must reference assemblies from VS installation of minimum supported version. Later VS versions will apply binding redirects. -->
+
+  <PropertyGroup Condition="$(MinimumVisualStudioVersion) == ''">
+    <MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(MinimumVisualStudioVersion) == '15.0'">
+    <_VisualStudioVersionRange>[15.0,16.0)</_VisualStudioVersionRange>
+    <_VisualStudioSdkVersion>15.0.26606</_VisualStudioSdkVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(MinimumVisualStudioVersion) == '16.0'">
+    <_VisualStudioVersionRange>[16.0,17.0)</_VisualStudioVersionRange>
+    <_VisualStudioSdkVersion>16.0.28729</_VisualStudioSdkVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(MinimumVisualStudioVersion) == '17.0'">
+    <_VisualStudioVersionRange>[17.0,18.0)</_VisualStudioVersionRange>
+    <_VisualStudioSdkVersion>17.0.32112.339</_VisualStudioSdkVersion>
+  </PropertyGroup>
+
+</Project>

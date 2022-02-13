@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29009.5
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSTabPath", "VSTabPath\VSTabPath.csproj", "{E2F60519-D34F-4411-9AB7-7916FC004E9F}"
 EndProject
@@ -12,7 +12,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSTabPath.Tests", "VSTabPath.Tests\VSTabPath.Tests.csproj", "{13611075-94B6-4EA9-B777-D56A83DB16D6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interop", "Interop", "{9BDB0B29-A5FB-464E-A0C1-C4F39FF9FB89}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VSTabPath.Interop.Contracts", "VSTabPath.Interop.Contracts\VSTabPath.Interop.Contracts.csproj", "{9F749E75-5CC7-4358-9F65-E73DACCE9439}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VSTabPath.Interop.X86", "VSTabPath.Interop.X86\VSTabPath.Interop.X86.csproj", "{861326D9-89DA-48AA-95AE-B8D39F2C654F}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "VSTabPath.Interop.Shared", "VSTabPath.Interop.Shared\VSTabPath.Interop.Shared.shproj", "{064A5FF7-B156-4165-9594-9867F5A5D382}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VSTabPath.Interop.X64", "VSTabPath.Interop.X64\VSTabPath.Interop.X64.csproj", "{ACD4939F-F3B4-4441-B140-BEFCBA0BE115}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		VSTabPath.Interop.Shared\VSTabPath.Interop.Shared.projitems*{064a5ff7-b156-4165-9594-9867f5a5d382}*SharedItemsImports = 13
+		VSTabPath.Interop.Shared\VSTabPath.Interop.Shared.projitems*{861326d9-89da-48aa-95ae-b8d39f2c654f}*SharedItemsImports = 5
+		VSTabPath.Interop.Shared\VSTabPath.Interop.Shared.projitems*{acd4939f-f3b4-4441-b140-befcba0be115}*SharedItemsImports = 5
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -26,9 +41,27 @@ Global
 		{13611075-94B6-4EA9-B777-D56A83DB16D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13611075-94B6-4EA9-B777-D56A83DB16D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13611075-94B6-4EA9-B777-D56A83DB16D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F749E75-5CC7-4358-9F65-E73DACCE9439}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F749E75-5CC7-4358-9F65-E73DACCE9439}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F749E75-5CC7-4358-9F65-E73DACCE9439}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F749E75-5CC7-4358-9F65-E73DACCE9439}.Release|Any CPU.Build.0 = Release|Any CPU
+		{861326D9-89DA-48AA-95AE-B8D39F2C654F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{861326D9-89DA-48AA-95AE-B8D39F2C654F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{861326D9-89DA-48AA-95AE-B8D39F2C654F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{861326D9-89DA-48AA-95AE-B8D39F2C654F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACD4939F-F3B4-4441-B140-BEFCBA0BE115}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACD4939F-F3B4-4441-B140-BEFCBA0BE115}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACD4939F-F3B4-4441-B140-BEFCBA0BE115}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACD4939F-F3B4-4441-B140-BEFCBA0BE115}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9F749E75-5CC7-4358-9F65-E73DACCE9439} = {9BDB0B29-A5FB-464E-A0C1-C4F39FF9FB89}
+		{861326D9-89DA-48AA-95AE-B8D39F2C654F} = {9BDB0B29-A5FB-464E-A0C1-C4F39FF9FB89}
+		{064A5FF7-B156-4165-9594-9867F5A5D382} = {9BDB0B29-A5FB-464E-A0C1-C4F39FF9FB89}
+		{ACD4939F-F3B4-4441-B140-BEFCBA0BE115} = {9BDB0B29-A5FB-464E-A0C1-C4F39FF9FB89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {73BC04EB-A8B6-4EF6-A137-3E4DC594D994}

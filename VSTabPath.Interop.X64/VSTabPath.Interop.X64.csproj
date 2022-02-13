@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EnvDTE80" Version="17.0.32112.339" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Shell.15.0" Version="17.0.32112.339" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VSTabPath.Interop.Contracts\VSTabPath.Interop.Contracts.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\VSTabPath.Interop.Shared\VSTabPath.Interop.Shared.projitems" Label="Shared" />
+
+</Project>

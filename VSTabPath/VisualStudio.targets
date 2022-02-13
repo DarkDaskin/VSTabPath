@@ -1,0 +1,14 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <Target Name="UpdateVisualStudioReferences" BeforeTargets="ResolveAssemblyReferences">
+    <Exec Command="$(VSWhereDir)vswhere.exe -version $(_VisualStudioVersionRange) -property installationPath" ConsoleToMSBuild="True">
+      <Output TaskParameter="ConsoleOutput" PropertyName="_VisualStudioPath" />
+    </Exec>
+    <Error Condition="$(_VisualStudioPath) == ''" Message="This project requires Visual Studio $(MinimumVisualStudioVersion) to be installed." />
+    <ItemGroup>
+      <_VisualStudioReference Include="@(Reference)" Condition="%(Reference->HasMetadata('IsVisualStudio')) == 'True'" />
+      <Reference Update="@(_VisualStudioReference)" HintPath="$(_VisualStudioPath)\Common7\IDE\%(Identity).dll" Private="False" />
+    </ItemGroup>
+  </Target>
+
+</Project>
